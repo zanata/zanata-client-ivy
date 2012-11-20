@@ -1,0 +1,5 @@
+TO DO
+-----
+
+ * Add option to clean up the ivy cache
+ * Allow user to specify a different version of zanata-client
