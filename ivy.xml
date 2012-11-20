@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+
+  <info organisation="org.zanata" module="zanataj" />
+
+  <dependencies>
+    <dependency org="org.zanata" name="zanata-client-commands" rev="2.0.1">
+      <exclude org="org.scannotation" />
+    </dependency>
+    <dependency org="net.sf.scannotation" name="scannotation" rev="1.0.2" />
+  </dependencies>
+
+</ivy-module>
