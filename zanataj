@@ -1,6 +1,16 @@
 #!/bin/sh
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-java -jar /usr/share/java/ivy.jar \
--ivy $DIR/ivy.xml \
+
+# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+ZANATAJ_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+IVY_JAR=/usr/share/java/ivy.jar
+if [ ! -r $IVY_JAR ]; then
+  echo "Please install Apache Ivy to $IVY_JAR."
+  echo "With Fedora or EPEL 6, run this as root: yum install apache-ivy"
+  exit 1
+fi
+
+java -jar $IVY_JAR \
+-ivy $ZANATAJ_HOME/ivy.xml \
 -warn \
 -main org.zanata.client.ZanataClient -args -- "$@"
