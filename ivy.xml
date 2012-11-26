@@ -3,15 +3,12 @@
   <info organisation="org.zanata" module="zanataj" />
 
   <dependencies>
-    <dependency org="org.zanata" name="zanata-client-commands" rev="2.0.1">
+    <dependency org="org.zanata" name="zanata-client-commands" rev="latest.release">
       <exclude org="org.scannotation" />
       <exclude org="log4j" name="log4j" />
     </dependency>
     <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.2" />
     <dependency org="org.slf4j" name="slf4j-simple" rev="1.7.2" />
-<!--
-    <dependency org="ch.qos.logback" name="logback-classic" rev="1.0.7" />
--->
   </dependencies>
 
 </ivy-module>

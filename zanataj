@@ -10,7 +10,18 @@ if [ ! -r $IVY_JAR ]; then
   exit 1
 fi
 
+unset IVY_LOG_LEVEL IVY_REFRESH IVY_SETTINGS
+
+# -error will omit ivy warnings
+IVY_LOG_LEVEL=-error
+
+# -refresh tells ivy to 'refresh dynamic resolved revisions' (eg SNAPSHOT deps)
+IVY_REFRESH=-refresh
+
+# override ivy resolvers (disabled)
+#IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
+
 java -jar $IVY_JAR \
--ivy $ZANATAJ_HOME/ivy.xml \
--warn \
--main org.zanata.client.ZanataClient -args -- "$@"
+  -ivy $ZANATAJ_HOME/ivy.xml \
+  $IVY_LOG_LEVEL $IVY_REFRESH $IVY_SETTINGS \
+  -main org.zanata.client.ZanataClient -args -- "$@"
