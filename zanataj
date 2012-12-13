@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # From http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 ZANATAJ_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -27,6 +27,14 @@ IVY_REFRESH=-refresh
 # override ivy resolvers
 IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
 
+IVY_LOG=$(mktemp)
+
+java \
+  -jar $IVY_JAR \
+  -ivy $ZANATAJ_HOME/ivy.xml \
+  $IVY_REFRESH $IVY_SETTINGS > $IVY_LOG ||
+  (cat $IVY_LOG; rm -f $IVY_LOG; exit 1)
+rm -f $IVY_LOG
 
 LOGGING_OPTS="
   -Dorg.slf4j.simpleLogger.showDateTime=false
