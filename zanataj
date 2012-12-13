@@ -10,6 +10,12 @@ if [ ! -r $IVY_JAR ]; then
   exit 1
 fi
 
+
+# Documentation for Ivy's command-line options are here:
+# http://ant.apache.org/ivy/history/latest-milestone/standalone.html
+# http://ant.apache.org/ivy/history/2.1.0/standalone.html
+
+
 unset IVY_LOG_LEVEL IVY_REFRESH IVY_SETTINGS
 
 # -error will omit ivy warnings
@@ -22,11 +28,18 @@ IVY_REFRESH=-refresh
 IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
 
 
-# Documentation for Ivy's command-line options are here:
-# http://ant.apache.org/ivy/history/latest-milestone/standalone.html
-# http://ant.apache.org/ivy/history/2.1.0/standalone.html
+LOGGING_OPTS="
+  -Dorg.slf4j.simpleLogger.showDateTime=false
+  -Dorg.slf4j.simpleLogger.showThreadName=false
+  -Dorg.slf4j.simpleLogger.showLogName=false
+  -Dorg.slf4j.simpleLogger.showShortLogName=false
+  -Dorg.slf4j.simpleLogger.levelInBrackets=true
+"
 
-java -jar $IVY_JAR \
+java \
+  $LOGGING_OPTS \
+  -jar $IVY_JAR \
   -ivy $ZANATAJ_HOME/ivy.xml \
   $IVY_LOG_LEVEL $IVY_REFRESH $IVY_SETTINGS \
-  -main org.zanata.client.ZanataClient -args -- "$@"
+  -main org.zanata.client.ZanataClient -args -- \
+  "$@"
