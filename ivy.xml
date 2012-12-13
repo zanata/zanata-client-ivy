@@ -3,8 +3,10 @@
   <info organisation="org.zanata" module="zanataj" />
 
   <dependencies>
-    <dependency org="org.zanata" name="zanata-client-commands" rev="latest.release">
+    <dependency org="org.zanata" name="zanata-cli" rev="latest.integration">
+      <!-- Omit unneeded dependency which conflicts with another one -->
       <exclude org="org.scannotation" />
+      <!-- We want to use log4j-over-slf4j instead -->
       <exclude org="log4j" name="log4j" />
     </dependency>
     <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.2" />

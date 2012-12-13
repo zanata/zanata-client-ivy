@@ -1,0 +1,22 @@
+<ivysettings>
+    <settings defaultResolver="default"/>
+    <property name="repoPath" value="${user.home}/.m2/repository" />
+    <property name="local-maven2-pattern"
+      value="${repoPath}/[organisation]/[module]/[revision]/[module]-[revision]"
+      override="false" />
+    <resolvers>
+        <chain name="default">
+            <!-- 1. Find artifacts in the user's local Maven repo -->
+            <filesystem name="local-maven2" m2compatible="true" local="true" >
+                <ivy pattern="${local-maven2-pattern}.pom" />
+                <artifact pattern="${local-maven2-pattern}(-[classifier]).[ext]" />
+            </filesystem>
+            <!-- 2. Find artifacts in Maven Central -->
+            <ibiblio name="central" m2compatible="true"/>
+            <!-- 3. Find Zanata artifacts which are unreleased (or
+                released but not yet in Central) -->
+            <ibiblio name="oss-public" m2compatible="true"
+                root="https://oss.sonatype.org/content/groups/public/"/>
+        </chain>
+    </resolvers>
+</ivysettings>

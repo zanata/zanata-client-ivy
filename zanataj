@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+# From http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 ZANATAJ_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 IVY_JAR=/usr/share/java/ivy.jar
@@ -18,8 +18,13 @@ IVY_LOG_LEVEL=-error
 # -refresh tells ivy to 'refresh dynamic resolved revisions' (eg SNAPSHOT deps)
 IVY_REFRESH=-refresh
 
-# override ivy resolvers (disabled)
-#IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
+# override ivy resolvers
+IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
+
+
+# Documentation for Ivy's command-line options are here:
+# http://ant.apache.org/ivy/history/latest-milestone/standalone.html
+# http://ant.apache.org/ivy/history/2.1.0/standalone.html
 
 java -jar $IVY_JAR \
   -ivy $ZANATAJ_HOME/ivy.xml \
