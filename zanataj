@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+: ${ZANATA_CLI_VERSION:="2.0.2-SNAPSHOT"}
+
 # From http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 ZANATAJ_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -15,7 +17,6 @@ fi
 # http://ant.apache.org/ivy/history/latest-milestone/standalone.html
 # http://ant.apache.org/ivy/history/2.1.0/standalone.html
 
-
 unset IVY_LOG_LEVEL IVY_REFRESH IVY_SETTINGS
 
 # -error will omit ivy warnings
@@ -29,9 +30,12 @@ IVY_SETTINGS="-settings $ZANATAJ_HOME/ivysettings.xml"
 
 IVY_LOG=$(mktemp)
 
+# Resolve dependencies with ivy's normal logging
+# but only output to console in case of failure.
+
 java \
   -jar $IVY_JAR \
-  -ivy $ZANATAJ_HOME/ivy.xml \
+  -dependency org.zanata zanata-cli $ZANATA_CLI_VERSION \
   $IVY_REFRESH $IVY_SETTINGS > $IVY_LOG ||
   (cat $IVY_LOG; rm -f $IVY_LOG; exit 1)
 rm -f $IVY_LOG
@@ -44,10 +48,12 @@ LOGGING_OPTS="
   -Dorg.slf4j.simpleLogger.levelInBrackets=true
 "
 
+# Invoke ZanataClient (and Ivy again) with minimal ivy logging (no ivy refresh)
+
 java \
   $LOGGING_OPTS \
   -jar $IVY_JAR \
-  -ivy $ZANATAJ_HOME/ivy.xml \
-  $IVY_LOG_LEVEL $IVY_REFRESH $IVY_SETTINGS \
+  -dependency org.zanata zanata-cli $ZANATA_CLI_VERSION \
+  $IVY_LOG_LEVEL $IVY_SETTINGS \
   -main org.zanata.client.ZanataClient -args -- \
   "$@"
