@@ -4,13 +4,7 @@
 
   <dependencies>
     <dependency org="org.zanata" name="zanata-cli" rev="2.0.2-SNAPSHOT">
-      <!-- Omit unneeded dependency which conflicts with another one -->
-      <exclude org="org.scannotation" />
-      <!-- We want to use log4j-over-slf4j instead -->
-      <exclude org="log4j" name="log4j" />
     </dependency>
-    <dependency org="org.slf4j" name="log4j-over-slf4j" rev="1.7.2" />
-    <dependency org="org.slf4j" name="slf4j-simple" rev="1.7.2" />
   </dependencies>
 
 </ivy-module>
