@@ -2,6 +2,38 @@
 
 : ${ZANATA_CLI_VERSION:="2.0.2-SNAPSHOT"}
 
+usage() {
+  cat <<EOF
+Usage: zanataj [OPTION]... <arguments>
+
+ -I        : This help
+ -Irefresh : Refresh Zanata artifacts
+ -Idebug   : Enable java debugger
+EOF
+}
+
+# Parse Low-level options
+unset opt_refresh opt_debug
+
+for arg in "$@"
+do
+  if [ "$arg" == "-Irefresh" ]
+  then
+    opt_refresh="true"
+    shift 1
+  elif [ "$arg" == "-Idebug" ]
+  then
+    opt_debug="true"
+    shift 1
+  elif [ "$arg" == "-I" ]
+  then
+    usage
+    exit 0
+  else
+    break
+  fi
+done
+
 IVY_JAR=/usr/share/java/ivy.jar
 if [ ! -r $IVY_JAR ]; then
   echo "Please install Apache Ivy to $IVY_JAR."
@@ -70,7 +102,15 @@ IVY_LOG=$WORKDIR/ivy.log
 # Other java options
 JAVA_OPTS=""
 # Enable Debugging
-# JAVA_OPTS="$JAVA_OPTS -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=y"
+if [ "$opt_debug" == "true" ]; then
+  JAVA_OPTS="$JAVA_OPTS -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=y"
+fi
+
+# Clear Zanata artifacts if requested
+if [ "$opt_refresh" == "true" ]; then
+  echo "Clearing cached Zanata artifacts..."
+  rm -rf ~/.ivy2/cache/org.zanata
+fi
 
 # Resolve dependencies with ivy's normal logging
 # but only output to console in case of failure.
