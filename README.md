@@ -13,9 +13,9 @@ https://github.com/zanata/zanata-client/
 
 Example command line
 ---------------------
-    zanataj stats --url https://translate.example.com/ --project iok --project-version 6.4
+    ./zanata-cli stats --url https://translate.example.com/ --project iok --project-version 6.4
 
 
 If you have a zanata.xml in the current directory:
-    zanataj stats
+    ./zanata-cli stats
 
