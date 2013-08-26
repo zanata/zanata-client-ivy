@@ -1,6 +1,12 @@
-#!/bin/sh -e
+#!/bin/bash
+set -e # exit on error
 
-: ${ZANATA_CLI_VERSION:="2.0.2-SNAPSHOT"}
+version=3.0.1
+rev=ivy-1
+name=zanata-cli-${version}-${rev}
+
+: ${ZANATA_CLI_VERSION:="$version"}
+: ${IVY_JAR:="/usr/share/java/ivy.jar"}
 
 usage() {
   cat <<EOF
@@ -34,7 +40,6 @@ do
   fi
 done
 
-IVY_JAR=/usr/share/java/ivy.jar
 if [ ! -r $IVY_JAR ]; then
   echo "Please install Apache Ivy to $IVY_JAR."
   echo "With Fedora or EPEL 6, run this as root: yum install apache-ivy"
@@ -48,6 +53,14 @@ fi
 # java -jar /usr/share/java/ivy.jar -?
 
 WORKDIR=$(mktemp --directory)
+
+function cleanup() {
+    if [[ -d "$WORKDIR" ]]
+    then
+        rm -r "$WORKDIR"
+    fi
+}
+trap cleanup EXIT
 
 IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 
@@ -86,11 +99,17 @@ IVY_XML="$WORKDIR/ivy.xml"
 cat > $IVY_XML <<EOF
 <ivy-module version="2.0">
     <info organisation="org.zanata" module="zanataj" />
-    <dependencies>
+
+    <dependencies defaultconf="default">
         <dependency org="org.zanata" name="zanata-cli" rev="$ZANATA_CLI_VERSION">
             <!-- Omit unneeded dependency which conflicts with another one -->
             <exclude org="org.scannotation" />
+            <!-- In some environments, Ivy tries to use the version "working@my.host.name" ! -->
+            <exclude org="org.jboss.resteasy" module="resteasy-jaxb-provider" />
+            <exclude org="org.jboss.resteasy" module="resteasy-multipart-provider" />
         </dependency>
+        <dependency org="org.jboss.resteasy" name="resteasy-jaxb-provider" rev="2.3.3.Final" />
+        <dependency org="org.jboss.resteasy" name="resteasy-multipart-provider" rev="2.3.3.Final" />
     </dependencies>
 </ivy-module>
 EOF
@@ -117,8 +136,9 @@ fi
 
 # -refresh tells ivy to 'refresh dynamic resolved revisions' (eg SNAPSHOT deps)
 
-echo "Resolving dependencies..."
+echo "$name: resolving dependencies..."
 java \
+  -Dapp.name="$0" \
   -jar $IVY_JAR \
   -refresh \
   -cachepath $WORKDIR/classpath \
@@ -132,5 +152,6 @@ java $JAVA_OPTS \
   -cp $(cat $WORKDIR/classpath) \
   org.zanata.client.ZanataClient "$@"
 
-# clean up ivy.xml ivysettings.xml ivy.log
-#rm -fr $WORKDIR
+trap - EXIT
+cleanup
+exit 0
