@@ -10,6 +10,17 @@ The source code for the Java client (ZanataClient) can be found here:
 https://github.com/zanata/zanata-client/
 
 
+Installation
+------------
+
+Just save the script https://raw.github.com/zanata/zanata-cli-ivy/master/zanata-cli somewhere on your path, and make sure it is executable.
+
+For example, if you have ~/bin in $PATH:
+
+    cd ~/bin
+    wget https://raw.github.com/zanata/zanata-cli-ivy/master/zanata-cli
+    chmod 755 zanata-cli
+
 
 Example command line
 ---------------------
