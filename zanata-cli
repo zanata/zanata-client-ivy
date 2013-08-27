@@ -2,7 +2,7 @@
 set -e # exit on error
 
 version=3.0.1
-rev=ivy-1
+rev=ivy-2
 name=zanata-cli-${version}-${rev}
 
 : ${ZANATA_CLI_VERSION:="$version"}
@@ -138,7 +138,6 @@ fi
 
 echo "$name: resolving dependencies..."
 java \
-  -Dapp.name="$0" \
   -jar $IVY_JAR \
   -refresh \
   -cachepath $WORKDIR/classpath \
@@ -149,6 +148,7 @@ rm -f $IVY_LOG
 # Invoke ZanataClient
 
 java $JAVA_OPTS \
+  -Dapp.name="$0" \
   -cp $(cat $WORKDIR/classpath) \
   org.zanata.client.ZanataClient "$@"
 
