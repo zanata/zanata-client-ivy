@@ -10,23 +10,68 @@ The source code for the Java client (ZanataClient) can be found here:
 https://github.com/zanata/zanata-client/
 
 
-Installation
-------------
+Fedora users don't need this
+----------------------------
 
-Just save the script https://raw.github.com/zanata/zanata-cli-ivy/master/zanata-cli somewhere on your path, and make sure it is executable.
+If you are using Fedora, you don't need this version, you can just install `zanata-cli` through yum:
 
-For example, if you have ~/bin in $PATH:
+    $ sudo yum install zanata-client
+
+You can keep zanata-cli up to date in the usual way (eg `yum update`).
+
+However, if you aren't running the latest version of Fedora, the latest
+version of the client may not be available, so you might want to try
+the Ivy version (below).
+
+
+Installing Ivy
+--------------
+
+First, make sure you have Apache Ivy installed.  On Red Hat Enterprise Linux 6, you first need to enable EPEL, with a command like this:
+
+    $ sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+
+Then install Ivy (this should work on Fedora too):
+
+    $ sudo yum install -y apache-ivy
+
+
+Installing zanata-cli (Ivy version)
+-----------------------------------
+
+Just save the script https://raw.github.com/zanata/zanata-client-ivy/master/zanata-cli somewhere on your path, and make sure it is executable.
+
+For example, if you have `~/bin` in `$PATH`:
 
     cd ~/bin
-    wget https://raw.github.com/zanata/zanata-cli-ivy/master/zanata-cli
+    wget https://raw.github.com/zanata/zanata-client-ivy/master/zanata-cli
     chmod 755 zanata-cli
 
-
-Example command line
----------------------
-    ./zanata-cli stats --url https://translate.example.com/ --project iok --project-version 6.4
+Note: It's a good idea to check for a new version of `zanata-cli` once in a while (eg when a new version of Zanata server is released).
 
 
-If you have a zanata.xml in the current directory:
-    ./zanata-cli stats
+Using zanata-cli (example)
+--------------------------
+
+    zanata-cli stats --url https://translate.example.com/ --project iok --project-version 6.4
+
+
+Or if you have `zanata.xml` in the current directory:
+    zanata-cli stats
+
+
+Troubleshooting
+---------------
+
+If zanata-client-ivy has trouble resolving dependencies, try deleting the ivy cache:
+
+    rm -rf ~/.ivy2/cache
+
+
+Reporting bugs
+--------------
+
+Please report bugs in the Ivy client here:
+
+https://bugzilla.redhat.com/enter_bug.cgi?format=guided&product=Zanata&component=Component-zanata-client-ivy
 
