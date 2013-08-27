@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # exit on error
 
-version=3.0.1
+version=latest.release
 rev=ivy-2
 name=zanata-cli-${version}-${rev}
 
@@ -62,59 +62,7 @@ function cleanup() {
 }
 trap cleanup EXIT
 
-IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
-
-# ivysettings.xml as a here document
-cat > $IVYSETTINGS_XML <<EOF
-<ivysettings>
-    <settings defaultResolver="default"/>
-    <property name="repoPath" value="\${user.home}/.m2/repository" />
-    <property name="local-maven2-pattern"
-      value="\${repoPath}/[organisation]/[module]/[revision]/[module]-[revision]"
-      override="false" />
-    <resolvers>
-        <chain name="default">
-            <!-- 1. Find artifacts in the user's local Maven repo -->
-            <filesystem name="local-maven2" m2compatible="true" local="true" >
-                <ivy pattern="\${local-maven2-pattern}.pom" />
-                <artifact pattern="\${local-maven2-pattern}(-[classifier]).[ext]" />
-            </filesystem>
-            <!-- 2. Find artifacts in Maven Central -->
-            <ibiblio name="central" m2compatible="true"/>
-            <!-- 3. Find Zanata artifacts which are unreleased (or
-                released but not yet in Central) -->
-            <ibiblio name="oss-public" m2compatible="true"
-                root="https://oss.sonatype.org/content/groups/public/"/>
-        </chain>
-    </resolvers>
-</ivysettings>
-EOF
-
-# override ivy resolvers
-IVY_SETTINGS="-settings $IVYSETTINGS_XML"
-
-IVY_XML="$WORKDIR/ivy.xml"
-
-# ivy.xml as a here document
-cat > $IVY_XML <<EOF
-<ivy-module version="2.0">
-    <info organisation="org.zanata" module="zanataj" />
-
-    <dependencies defaultconf="default">
-        <dependency org="org.zanata" name="zanata-cli" rev="$ZANATA_CLI_VERSION">
-            <!-- Omit unneeded dependency which conflicts with another one -->
-            <exclude org="org.scannotation" />
-            <!-- In some environments, Ivy tries to use the version "working@my.host.name" ! -->
-            <exclude org="org.jboss.resteasy" module="resteasy-jaxb-provider" />
-            <exclude org="org.jboss.resteasy" module="resteasy-multipart-provider" />
-        </dependency>
-        <dependency org="org.jboss.resteasy" name="resteasy-jaxb-provider" rev="2.3.3.Final" />
-        <dependency org="org.jboss.resteasy" name="resteasy-multipart-provider" rev="2.3.3.Final" />
-    </dependencies>
-</ivy-module>
-EOF
-
-IVY_CONFIG="-ivy $IVY_XML"
+IVY_CONFIG="-dependency org.zanata zanata-cli $ZANATA_CLI_VERSION"
 
 IVY_LOG=$WORKDIR/ivy.log
 
