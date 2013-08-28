@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e # exit on error
 
-version=3.0.1
-rev=ivy-2
+version=3.1.0
+rev=ivy-1
 name=zanata-cli-${version}-${rev}
 
 : ${ZANATA_CLI_VERSION:="$version"}
