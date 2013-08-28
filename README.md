@@ -10,10 +10,10 @@ The source code for the Java client (ZanataClient) can be found here:
 https://github.com/zanata/zanata-client/
 
 
-Fedora users don't need this
-----------------------------
+Fedora users don't need this (but this might be newer)
+------------------------------------------------------
 
-If you are using Fedora, you don't need this version, you can just install `zanata-cli` through yum:
+If you are using Fedora, you can just install `zanata-cli` through yum:
 
     $ sudo yum install zanata-client
 
@@ -24,8 +24,8 @@ version of the client may not be available, so you might want to try
 the Ivy version (below).
 
 
-Installing Ivy
---------------
+Installing Ivy: on Fedora/RHEL
+------------------------------
 
 First, make sure you have Apache Ivy installed.  On Red Hat Enterprise Linux 6, you first need to enable EPEL, with a command like this:
 
@@ -36,18 +36,26 @@ Then install Ivy (this should work on Fedora too):
     $ sudo yum install -y apache-ivy
 
 
+Installing Ivy: on other systems
+--------------------------------
+
+Save [Ivy's jar](http://ant.apache.org/ivy/download.cgi) file somewhere, and set the environment variable `IVY_JAR` to point to it.  For example:
+
+    export IVY_JAR=~/apps/apache-ivy-2.3.0/ivy-2.3.0.jar
+
+
 Installing zanata-cli (Ivy version)
 -----------------------------------
 
 Just save the script https://raw.github.com/zanata/zanata-client-ivy/master/zanata-cli somewhere on your path, and make sure it is executable.
 
-For example, if you have `~/bin` in `$PATH`:
+For example, assuming you have `~/bin` in `$PATH`:
 
     cd ~/bin
     wget https://raw.github.com/zanata/zanata-client-ivy/master/zanata-cli
     chmod 755 zanata-cli
 
-Note: It's a good idea to check for a new version of `zanata-cli` once in a while (eg when a new version of Zanata server is released).
+Note: It's a good idea to check for a new version of `zanata-cli` once in a while (especially when a new version of Zanata server is released).
 
 
 Using zanata-cli (example)
@@ -57,7 +65,20 @@ Using zanata-cli (example)
 
 
 Or if you have `zanata.xml` in the current directory:
+
     zanata-cli stats
+
+
+Running development versions of zanata-cli
+------------------------------------------
+
+Each version of the script is mainly designed to work with a particular version of the Zanata client, but you can try using it with another version, eg the latest development version.
+
+For example:
+
+    export ZANATA_CLI_VERSION=3.1.2-SNAPSHOT
+    zanata-cli help
+
 
 
 Troubleshooting
@@ -66,6 +87,12 @@ Troubleshooting
 If zanata-client-ivy has trouble resolving dependencies, try deleting the ivy cache:
 
     rm -rf ~/.ivy2/cache
+
+
+Mailing list
+------------
+
+https://www.redhat.com/mailman/listinfo/zanata-users
 
 
 Reporting bugs
