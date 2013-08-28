@@ -39,7 +39,7 @@ Then install Ivy (this should work on Fedora too):
 Installing Ivy: on other systems
 --------------------------------
 
-Save [Ivy's jar](http://ant.apache.org/ivy/download.cgi) file somewhere, and set the environment variable `IVY_JAR` to point to it.  For example:
+Download an [Ivy binary distribution](http://ant.apache.org/ivy/download.cgi), extract Ivy's jar file somewhere, and set the environment variable `IVY_JAR` to point to it.  For example:
 
     export IVY_JAR=~/apps/apache-ivy-2.3.0/ivy-2.3.0.jar
 
