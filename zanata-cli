@@ -2,7 +2,7 @@
 set -e # exit on error
 
 version=3.1.1
-rev=ivy-1
+rev=ivy-2
 name=zanata-cli-${version}-${rev}
 
 : ${ZANATA_CLI_VERSION:="$version"}
@@ -131,7 +131,6 @@ fi
 echo "$name: resolving dependencies..."
 java \
   -jar $IVY_JAR \
-  -refresh \
   -cachepath $WORKDIR/classpath \
   $IVY_CONFIG $IVY_SETTINGS > $IVY_LOG ||
   (echo "ERROR: dependency resolution failed.  Ivy log follows:"; cat $IVY_LOG; rm -f $IVY_LOG; exit 1)
