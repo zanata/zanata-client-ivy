@@ -4,7 +4,7 @@ set -e # exit on error
 
 # Check here for the latest version
 # http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.zanata%22%20AND%20a%3A%22zanata-cli%22
-version=3.1.2
+version=3.2.0
 rev=ivy-1
 name=zanata-cli-${version}-${rev}
 
