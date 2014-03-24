@@ -131,13 +131,22 @@ fi
 
 # -refresh tells ivy to 'refresh dynamic resolved revisions' (eg SNAPSHOT deps)
 
-echo "$name: resolving dependencies..."
+echo "$name: resolving dependencies with Ivy..."
+touch $IVY_LOG
+columns=80
+while line=$(tail -n 1 $IVY_LOG 2>/dev/null); do
+  printf "%-*s\r" $columns "$line"
+  sleep 1
+done &
+
 java \
   -jar $IVY_JAR \
   -cachepath $WORKDIR/classpath \
-  $IVY_CONFIG $IVY_SETTINGS > $IVY_LOG ||
+  $IVY_CONFIG $IVY_SETTINGS >> $IVY_LOG ||
   (echo "ERROR: dependency resolution failed.  Ivy log follows:"; cat $IVY_LOG; rm -f $IVY_LOG; exit 1)
 rm -f $IVY_LOG
+wait
+printf "%-*s\r" $columns
 
 # Invoke ZanataClient
 
