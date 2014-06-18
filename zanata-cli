@@ -46,6 +46,7 @@ done
 if [ ! -r $IVY_JAR ]; then
   echo "Please install Apache Ivy to $IVY_JAR."
   echo "With Fedora or EPEL 6, run this as root: yum install apache-ivy"
+  echo "On OSX (with Homebrew): brew install ivy [and set IVY_JAR to point to ivy.jar]"
   exit 1
 fi
 
@@ -55,7 +56,7 @@ fi
 # http://ant.apache.org/ivy/history/2.1.0/standalone.html
 # java -jar /usr/share/java/ivy.jar -?
 
-WORKDIR=$(mktemp --directory)
+WORKDIR=$(mktemp -d -t zanata-cli.XXXXXX)
 
 function cleanup() {
     if [[ -d "$WORKDIR" ]]
@@ -68,7 +69,7 @@ trap cleanup EXIT
 IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 
 # ivysettings.xml as a here document
-cat > $IVYSETTINGS_XML <<EOF
+cat > $IVYSETTINGS_XML <<'EOF'
 <ivysettings>
     <settings defaultResolver="default"/>
     <resolvers>
