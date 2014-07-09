@@ -51,6 +51,8 @@ if [ ! -r $IVY_JAR ]; then
 fi
 
 
+
+
 # Documentation for Ivy's command-line options are here:
 # http://ant.apache.org/ivy/history/latest-milestone/standalone.html
 # http://ant.apache.org/ivy/history/2.1.0/standalone.html
@@ -65,6 +67,52 @@ function cleanup() {
     fi
 }
 trap cleanup EXIT
+
+# taken (modified) from http://stackoverflow.com/a/4024038/345718
+# It will echo 10 if the versions are the same, 11 if version 1 is greater than version 2 and 9 otherwise.
+do_version_check() {
+
+   [ "$1" == "$2" ] && echo 10
+
+   ver1front=`echo $1 | cut -d "." -f -1`
+   ver1back=`echo $1 | cut -d "." -f 2-`
+
+   ver2front=`echo $2 | cut -d "." -f -1`
+   ver2back=`echo $2 | cut -d "." -f 2-`
+
+   if [ "$ver1front" != "$1" ] || [ "$ver2front" != "$2" ]; then
+       [ "$ver1front" -gt "$ver2front" ] && echo 11
+       [ "$ver1front" -lt "$ver2front" ] && echo 9
+
+       [ "$ver1front" == "$1" ] || [ -z "$ver1back" ] && ver1back=0
+       [ "$ver2front" == "$2" ] || [ -z "$ver2back" ] && ver2back=0
+       echo $(do_version_check "$ver1back" "$ver2back")
+   else
+           [ "$1" -gt "$2" ] && echo 11 || echo 9
+   fi
+}
+
+
+if ! type jq > /dev/null
+then
+  echo "Please also install jq if you want to get notified when newer version is available"
+  echo "With Fedora or EPEL 6, run this as root: yum install jq"
+else
+  curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/zanata/zanata-client/tags" > $WORKDIR/client_tags.json
+  # TODO error detection
+  LATEST_TAG=$(cat $WORKDIR/client_tags.json | jq --raw-output '.[0].name')
+  LATEST_VER=$(echo $LATEST_TAG | cut -d'-' -f 2)
+  ver_comp=$(do_version_check $ZANATA_CLI_VERSION $LATEST_VER)
+
+  if [ $ver_comp -eq 9 ]
+  then
+    echo   "============================================================" #60 characters
+    printf "= Latest client version is: %-10s =====================\n" "$LATEST_VER"
+    printf "= Your current version is:  %-10s =====================\n" "$ZANATA_CLI_VERSION"
+    printf "= You may want to update ZANATA_CLI_VERSION to %-10s ==\n" "$LATEST_VER"
+    echo   "============================================================"
+  fi
+fi
 
 IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 
