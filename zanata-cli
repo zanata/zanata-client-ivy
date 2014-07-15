@@ -1,10 +1,10 @@
 #!/bin/bash
-set -e # exit on error
+# can not set -e otherwise below do_version_check will not behave
+# set -e # exit on error
+# set -x
 
-
-# Check here for the latest version
-# http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.zanata%22%20AND%20a%3A%22zanata-cli%22
-version=3.3.2
+# Latest version may be checked (on user's consent) and used below
+version=3.4.0
 rev=ivy-1
 name=zanata-cli-${version}-${rev}
 
@@ -68,51 +68,139 @@ function cleanup() {
 }
 trap cleanup EXIT
 
-# taken (modified) from http://stackoverflow.com/a/4024038/345718
-# It will echo 10 if the versions are the same, 11 if version 1 is greater than version 2 and 9 otherwise.
-do_version_check() {
+# taken from http://stackoverflow.com/a/4024038/345718
+# It will return 10 if the versions are the same, 11 if version 1 is greater than version 2 and 9 otherwise.
+do_version_check() 
+{
+  [ "$1" == "$2" ] && return 10
 
-   [ "$1" == "$2" ] && echo 10
+  ver1front=`echo $1 | cut -d "." -f -1`
+  ver1back=`echo $1 | cut -d "." -f 2-`
 
-   ver1front=`echo $1 | cut -d "." -f -1`
-   ver1back=`echo $1 | cut -d "." -f 2-`
+  ver2front=`echo $2 | cut -d "." -f -1`
+  ver2back=`echo $2 | cut -d "." -f 2-`
 
-   ver2front=`echo $2 | cut -d "." -f -1`
-   ver2back=`echo $2 | cut -d "." -f 2-`
+  if [ "$ver1front" != "$1" ] || [ "$ver2front" != "$2" ]; then
+     [ "$ver1front" -gt "$ver2front" ] && return 11
+     [ "$ver1front" -lt "$ver2front" ] && return 9
 
-   if [ "$ver1front" != "$1" ] || [ "$ver2front" != "$2" ]; then
-       [ "$ver1front" -gt "$ver2front" ] && echo 11
-       [ "$ver1front" -lt "$ver2front" ] && echo 9
-
-       [ "$ver1front" == "$1" ] || [ -z "$ver1back" ] && ver1back=0
-       [ "$ver2front" == "$2" ] || [ -z "$ver2back" ] && ver2back=0
-       echo $(do_version_check "$ver1back" "$ver2back")
-   else
-           [ "$1" -gt "$2" ] && echo 11 || echo 9
-   fi
+     [ "$ver1front" == "$1" ] || [ -z "$ver1back" ] && ver1back=0
+     [ "$ver2front" == "$2" ] || [ -z "$ver2back" ] && ver2back=0
+     do_version_check "$ver1back" "$ver2back"
+     return $?
+  else
+    [ "$1" -gt "$2" ] && return 11 || return 9
+  fi
 }
 
-
-if ! type jq > /dev/null
-then
-  echo "Please also install jq if you want to get notified when newer version is available"
-  echo "With Fedora or EPEL 6, run this as root: yum install jq"
-else
-  curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/zanata/zanata-client/tags" > $WORKDIR/client_tags.json
-  # TODO error detection
-  LATEST_TAG=$(cat $WORKDIR/client_tags.json | jq --raw-output '.[0].name')
-  LATEST_VER=$(echo $LATEST_TAG | cut -d'-' -f 2)
-  ver_comp=$(do_version_check $ZANATA_CLI_VERSION $LATEST_VER)
-
-  if [ $ver_comp -eq 9 ]
+check_update() 
+{
+  if ! type xml_grep > /dev/null
   then
-    echo   "============================================================" #60 characters
-    printf "= Latest client version is: %-10s =====================\n" "$LATEST_VER"
-    printf "= Your current version is:  %-10s =====================\n" "$ZANATA_CLI_VERSION"
-    printf "= You may want to update ZANATA_CLI_VERSION to %-10s ==\n" "$LATEST_VER"
-    echo   "============================================================"
+    echo "Please install xml_grep if you want to get notified when newer version is available"
+    echo "With Fedora or EPEL, run this as root: yum install perl-XML-Twig"
+    return 1
+  else
+    curl "https://oss.sonatype.org/service/local/artifact/maven/resolve?g=org.zanata&a=client&p=pom&v=LATEST&r=releases" > $WORKDIR/client_latest.xml
+    # TODO error detection
+    latest=$(xml_grep --cond "//version" --text_only $WORKDIR/client_latest.xml)
+    do_version_check $ZANATA_CLI_VERSION $latest
+    ver_comp=$?
+    if [ $ver_comp -eq 9 ]
+    then
+      echo   "============================================================" #60 characters
+      printf "= Latest client version is: %-10s =====================\n" "$latest"
+      printf "= Your current version is:  %-10s =====================\n" "$ZANATA_CLI_VERSION"
+      printf "= Will update to use %-10s ==\n" "$latest"
+      echo   "============================================================"
+    fi
+  fi
+}
+
+# check zanata-client-update.properties file
+FILE=$HOME/.config/zanata-client-update.properties
+# read $FILE using the file descriptors
+if [ -s $FILE ] && [ -r $FILE ]; then
+  source $FILE
+fi
+should_check=1
+# the regex is for roughly valid date format. 
+# i.e. 2014-12-21. Although it won't prevent invalid dates such as 31 of Feb.
+if [ $lastChecked ] && [[ $lastChecked =~ 20[1-9][1-9]\-[01][0-9]\-[0-3][0-9] ]]; then
+  diff_in_seconds=$(($(date -u +%s) - $(date -u -d"$lastChecked" +%s)))
+  ((diff_in_days=diff_in_seconds/60/60/24))
+fi
+
+if [ $frequency ]; then
+  case $frequency in
+  monthly)
+    ((should_check=diff_in_days-30))
+  ;;
+  daily)
+    ((should_check=diff_in_days-1))
+  ;;
+  # by default treat it as weekly
+  *)
+    ((should_check=diff_in_days-7))
+  ;;
+  esac
+else
+  frequency=weekly
+fi
+
+# echo "frequency $frequency"
+
+if [ -z $noAsking ]; then
+  noAsking=false
+fi
+
+update_file()
+{
+  # make sure here replicates what org.zanata.client.commands.UpdateChecker does
+  cat > $FILE <<EOF
+lastChecked=$1
+# Valid values: weekly|monthly|daily. Default is weekly.
+frequency=$2
+# true|false. If true will perform update check if needed without asking.
+noAsking=$3
+latest=$4
+EOF
+}
+
+do_update()
+{
+  check_update
+  if [ $? ]; then
+    lastChecked=$(date +%Y-%m-%d)
+    update_file "$lastChecked" "$frequency" "$noAsking" "$latest"
+    echo "$FILE is updated. Check its content to control updates"
+  fi
+}
+
+# echo "should check $should_check"
+
+if [ $should_check -gt 0 ]; then
+  echo "$diff_in_days days since last update check"
+  if [ $noAsking != 'true' ]; then
+    printf "Do you want to check for updates (y/n)?"
+    while read opt
+    do
+      case "$opt" in
+      y) do_update;;
+      *) ;;
+      esac
+      break
+    done
+  else
+    do_update
   fi
 fi
+
+if [ $latest ]; then
+  ZANATA_CLI_VERSION=$latest
+fi
+
+echo "will be using zanata client version $ZANATA_CLI_VERSION"
 
 IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 
