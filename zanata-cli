@@ -43,6 +43,7 @@ do
   fi
 done
 
+# Check ivy is present
 if [ ! -r $IVY_JAR ]; then
   echo "Please install Apache Ivy to $IVY_JAR."
   echo "With Fedora or EPEL 6, run this as root: yum install apache-ivy"
@@ -50,6 +51,27 @@ if [ ! -r $IVY_JAR ]; then
   exit 1
 fi
 
+# Check Java is present
+if type -p java; then
+  # found java executable in PATH
+  JAVA_BIN=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+  # found java executable in JAVA_HOME
+  JAVA_BIN="$JAVA_HOME/bin/java"
+else
+  echo "A Java runtime is required for zanata-cli"
+  echo "With Fedora or EPEL 6, run this as root: yum install java-1.7.0-openjdk"
+  exit 1
+fi
+
+# Check Java is 1.7+
+if [[ "$JAVA_BIN" ]]; then
+  version=$("$JAVA_BIN" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  if [[ "$version" < "1.7" ]]; then
+    echo "Java version is lower than 1.7, which is required for zanata-cli"
+    exit 1
+  fi
+fi
 
 # Documentation for Ivy's command-line options are here:
 # http://ant.apache.org/ivy/history/latest-milestone/standalone.html
@@ -140,7 +162,7 @@ while line=$(tail -n 1 $IVY_LOG 2>/dev/null); do
   sleep 1
 done &
 
-java \
+$JAVA_BIN \
   -jar $IVY_JAR \
   -cachepath $WORKDIR/classpath \
   $IVY_CONFIG $IVY_SETTINGS >> $IVY_LOG ||
