@@ -173,7 +173,7 @@ printf "%-*s\r" $columns
 
 # Invoke ZanataClient
 
-java $JAVA_OPTS \
+$JAVA_BIN $JAVA_OPTS \
   -Dapp.name="$0" \
   -cp $(cat $WORKDIR/classpath) \
   org.zanata.client.ZanataClient "$@"
