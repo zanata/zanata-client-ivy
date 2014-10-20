@@ -1,7 +1,6 @@
 #!/bin/bash
-# can not set -e otherwise below do_version_check will not behave
-# set -e # exit on error
-# set -x
+set -e # exit on error
+#set -x
 
 # Latest version may be checked (on user's consent) and used below
 version=3.4.0
@@ -128,20 +127,20 @@ should_check=1
 # i.e. 2014-12-21. Although it won't prevent invalid dates such as 31 of Feb.
 if [ $lastChecked ] && [[ $lastChecked =~ 20[1-9][1-9]\-[01][0-9]\-[0-3][0-9] ]]; then
   diff_in_seconds=$(($(date -u +%s) - $(date -u -d"$lastChecked" +%s)))
-  ((diff_in_days=diff_in_seconds/60/60/24))
+  diff_in_days=$((diff_in_seconds/60/60/24))
 fi
 
 if [ $frequency ]; then
   case $frequency in
   monthly)
-    ((should_check=diff_in_days-30))
+    should_check=$((diff_in_days-30))
   ;;
   daily)
-    ((should_check=diff_in_days-1))
+    should_check=$((diff_in_days-1))
   ;;
   # by default treat it as weekly
   *)
-    ((should_check=diff_in_days-7))
+    should_check=$((diff_in_days-7))
   ;;
   esac
 else
@@ -200,7 +199,7 @@ if [ $latest ]; then
   ZANATA_CLI_VERSION=$latest
 fi
 
-echo "will be using zanata client version $ZANATA_CLI_VERSION"
+# echo "will be using zanata client version $ZANATA_CLI_VERSION"
 
 IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 
