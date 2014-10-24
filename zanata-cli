@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e # exit on error
-#set -x
+# set -x
 
 # Latest version may be checked (on user's consent) and used below
 version=3.4.0
@@ -103,7 +103,9 @@ check_update()
     curl "https://oss.sonatype.org/service/local/artifact/maven/resolve?g=org.zanata&a=client&p=pom&v=LATEST&r=releases" > $WORKDIR/client_latest.xml
     # TODO error detection
     latest=$(xml_grep --cond "//version" --text_only $WORKDIR/client_latest.xml)
+    set +e
     do_version_check $ZANATA_CLI_VERSION $latest
+    set -e
     ver_comp=$?
     if [ $ver_comp -eq 9 ]
     then
