@@ -73,6 +73,11 @@ if [[ "$JAVA_BIN" ]]; then
   fi
 fi
 
+# check if user are using SNAPSHOT version
+if [[ $ZANATA_CLI_VERSION =~ latest.*|.*-SNAPSHOT ]] && [[ $opt_refresh != 'true' ]]; then
+  echo "[!] You are using a dynamic version (SNAPSHOT or latest). Use -Irefresh to make sure you are getting the newest from the repo"
+fi
+
 # Documentation for Ivy's command-line options are here:
 # http://ant.apache.org/ivy/history/latest-milestone/standalone.html
 # http://ant.apache.org/ivy/history/2.1.0/standalone.html
@@ -94,8 +99,11 @@ IVYSETTINGS_XML="$WORKDIR/ivysettings.xml"
 cat > $IVYSETTINGS_XML <<'EOF'
 <ivysettings>
     <settings defaultResolver="default"/>
+    <pattern-vm>
+        <match revision="snapshots" pattern="\.*SNAPSHOT" matcher="regexp" />
+    </pattern-vm>
     <resolvers>
-        <chain name="default">
+        <chain name="default" cache="zanatajCache">
             <!-- 1. Find artifacts in Maven Central -->
             <ibiblio name="central" m2compatible="true"/>
             <!-- 2. Find Zanata artifacts which are unreleased (or
@@ -104,6 +112,14 @@ cat > $IVYSETTINGS_XML <<'EOF'
                 root="https://oss.sonatype.org/content/groups/public/"/>
         </chain>
     </resolvers>
+    <caches>
+        <!-- The TTL duration can also be set to 'eternal', 
+             in which case once resolved the revision is always use, 
+             except when resolving in refresh mode. -->
+        <cache name="zanatajCache" defaultTTL="eternal">
+            <ttl revision="snapshots" duration="500ms"/>
+        </cache>
+    </caches>
 </ivysettings>
 EOF
 
@@ -161,6 +177,7 @@ while line=$(tail -n 1 $IVY_LOG 2>/dev/null); do
   printf "%-*s\r" $columns "$line"
   sleep 1
 done &
+
 
 $JAVA_BIN \
   -jar $IVY_JAR \
