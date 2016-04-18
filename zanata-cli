@@ -60,15 +60,15 @@ elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
   JAVA_BIN="$JAVA_HOME/bin/java"
 else
   echo "A Java runtime is required for zanata-cli"
-  echo "With Fedora or EPEL 6, run this as root: yum install java-1.7.0-openjdk"
+  echo "With Fedora or EPEL 6/7, run this as root: yum install java-1.8.0-openjdk"
   exit 1
 fi
 
-# Check Java is 1.7+
+# Check Java is 1.8+
 if [[ "$JAVA_BIN" ]]; then
   version=$("$JAVA_BIN" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-  if [[ "$version" < "1.7" ]]; then
-    echo "Java version is lower than 1.7, which is required for zanata-cli"
+  if [[ "$version" < "1.8" ]]; then
+    echo "Java version is lower than 1.8, which is required for zanata-cli"
     exit 1
   fi
 fi
