@@ -9,6 +9,8 @@ Ivy to download the client from Maven Central and then run it.
 The source code for the Java client (ZanataClient) can be found here:
 https://github.com/zanata/zanata-client/
 
+See also our 0install option, which is a better choice in most cases: http://docs.zanata.org/projects/zanata-client/en/release/installation/linux-installation/
+
 
 Fedora users don't need this (but this might be newer)
 ------------------------------------------------------
@@ -41,7 +43,7 @@ Installing Ivy: on other systems
 
 Download an [Ivy binary distribution](http://ant.apache.org/ivy/download.cgi), extract Ivy's jar file somewhere, and set the environment variable `IVY_JAR` to point to it.  For example:
 
-    export IVY_JAR=~/apps/apache-ivy-2.3.0/ivy-2.3.0.jar
+    export IVY_JAR=~/apps/apache-ivy-2.4.0/ivy-2.4.0.jar
 
 
 Installing zanata-cli (Ivy version)
@@ -76,7 +78,7 @@ Each version of the script is mainly designed to work with a particular version 
 
 For example:
 
-    export ZANATA_CLI_VERSION=3.1.2-SNAPSHOT
+    export ZANATA_CLI_VERSION=3.9.0-SNAPSHOT
     zanata-cli help
 
 
@@ -100,5 +102,4 @@ Reporting bugs
 
 Please report bugs in the Ivy client here:
 
-https://bugzilla.redhat.com/enter_bug.cgi?format=guided&product=Zanata&component=Component-zanata-client-ivy
-
+https://zanata.atlassian.net/
