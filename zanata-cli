@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e # exit on error
-
+#set -x # log script actions
 
 # Check here for the latest version
 # http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.zanata%22%20AND%20a%3A%22zanata-cli%22
-version=3.4.0
+version=3.8.4
 rev=ivy-1
 name=zanata-cli-${version}-${rev}
 
@@ -142,8 +142,12 @@ cat > $IVY_XML <<EOF
             <exclude org="org.jboss.resteasy" module="resteasy-multipart-provider" />
             <exclude org="org.slf4j" module="slf4j-simple" />
         </dependency>
-        <dependency org="org.jboss.resteasy" name="resteasy-jaxb-provider" rev="3.0.1.Final" />
-        <dependency org="org.jboss.resteasy" name="resteasy-multipart-provider" rev="3.0.1.Final" />
+        <dependency org="org.jboss.resteasy" name="resteasy-jaxb-provider" rev="3.0.1.Final">
+            <exclude org="org.slf4j" module="slf4j-simple" />
+        </dependency>
+        <dependency org="org.jboss.resteasy" name="resteasy-multipart-provider" rev="3.0.1.Final">
+            <exclude org="org.slf4j" module="slf4j-simple" />
+        </dependency>
     </dependencies>
 </ivy-module>
 EOF
