@@ -1,0 +1,22 @@
+# use http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
+# cache local Maven repo: http://docs.travis-ci.com/user/caching/
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+
+language: java
+
+# Use the 'true' command to avoid up-front dependency fetching, for faster builds
+# See http://docs.travis-ci.com/user/languages/java/#Dependency-Management
+install: /bin/true
+
+script: |
+  ./zanata-cli --version
+
+jdk:
+  - oraclejdk8
+
+matrix:
+  fast_finish: true
